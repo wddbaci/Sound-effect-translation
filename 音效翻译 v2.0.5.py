@@ -525,8 +525,10 @@ class TranslationApp:
     def __init__(self, root):
         self.root = root
         root.title("波波的音频翻译软件")
-        root.geometry("920x820")
+        root.geometry("800x600")
         root.resizable(True, True)
+        # 设置窗口最小尺寸，保证按钮不被挤压
+        root.minsize(800, 600)
 
         self.log_queue = queue.Queue()
         self.stop_event = threading.Event()
@@ -579,16 +581,29 @@ class TranslationApp:
         self.folder_entry.pack(side=tk.LEFT, expand=True, fill="x")
         tk.Button(folder_frame, text="浏览...", command=self.choose_folder).pack(side=tk.RIGHT, padx=5)
 
+        # ---------- 修改部分：使用 grid 布局保证按钮不被挤压 ----------
         key_frame = tk.Frame(frame)
         key_frame.pack(pady=5, fill="x", padx=10)
-        tk.Label(key_frame, text="API Key：").pack(side=tk.LEFT)
+
+        # 配置列权重：输入框列可扩展，其余列固定宽度
+        key_frame.columnconfigure(1, weight=1)  # 第1列是输入框，设置权重
+        # 其他列权重为0，宽度由内容决定
+
+        tk.Label(key_frame, text="API Key：").grid(row=0, column=0, sticky="w", padx=(0, 5))
+
         self.api_key_var = tk.StringVar(value=self.config_mgr.api_key)
-        self.key_entry = tk.Entry(key_frame, textvariable=self.api_key_var, width=50, show="*")
-        self.key_entry.pack(side=tk.LEFT, expand=True, fill="x", padx=5)
+        self.key_entry = tk.Entry(key_frame, textvariable=self.api_key_var, show="*", width=20)
+        self.key_entry.grid(row=0, column=1, sticky="ew", padx=5)
+
         self.show_key_btn = tk.Button(key_frame, text="👁", command=self.toggle_key_visibility, width=3)
-        self.show_key_btn.pack(side=tk.LEFT)
-        tk.Button(key_frame, text="保存 Key", command=self.save_key).pack(side=tk.LEFT, padx=5)
-        tk.Button(key_frame, text="测试 API", command=self.test_api).pack(side=tk.LEFT, padx=5)
+        self.show_key_btn.grid(row=0, column=2, padx=2)
+
+        save_btn = tk.Button(key_frame, text="保存 Key", command=self.save_key)
+        save_btn.grid(row=0, column=3, padx=2)
+
+        test_btn = tk.Button(key_frame, text="测试 API", command=self.test_api)
+        test_btn.grid(row=0, column=4, padx=2)
+        # ------------------------------------------------------------
 
         mode_frame = tk.Frame(frame)
         mode_frame.pack(pady=5, fill="x", padx=10)
