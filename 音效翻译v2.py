@@ -21,7 +21,6 @@ try:
     HAS_DND = True
 except ImportError:
     HAS_DND = False
-    # 定义占位符，避免后续引用错误
     DND_FILES = None
     TkinterDnD = tk.Tk
 
@@ -71,7 +70,6 @@ class ConfigManager:
         self.enable_camel_split = True
         self.include_pattern = ""
         self.exclude_pattern = ""
-        self.dark_mode = False
         self.load()
 
     def load(self):
@@ -87,7 +85,6 @@ class ConfigManager:
                     self.enable_camel_split = data.get("enable_camel_split", True)
                     self.include_pattern = data.get("include_pattern", "")
                     self.exclude_pattern = data.get("exclude_pattern", "")
-                    self.dark_mode = data.get("dark_mode", False)
             except Exception:
                 pass
 
@@ -102,7 +99,6 @@ class ConfigManager:
                 "enable_camel_split": self.enable_camel_split,
                 "include_pattern": self.include_pattern,
                 "exclude_pattern": self.exclude_pattern,
-                "dark_mode": self.dark_mode,
             }
             with open(config_file, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
@@ -395,7 +391,6 @@ class FileProcessor:
                 if not re.search(include_pattern, rel_path):
                     return False
             except re.error:
-                # 正则无效时默认接受
                 pass
         if exclude_pattern:
             try:
@@ -409,9 +404,9 @@ class FileProcessor:
 class PreviewWindow:
     def __init__(self, parent, file_list, translations, callback):
         self.parent = parent
-        self.file_list = file_list          # 原始文件相对路径列表
-        self.translations = translations    # 翻译结果列表
-        self.callback = callback            # 确认后的回调
+        self.file_list = file_list
+        self.translations = translations
+        self.callback = callback
         self.modified_translations = translations.copy()
 
         self.win = tk.Toplevel(parent)
@@ -462,10 +457,17 @@ class PreviewWindow:
             x, y, width, height = self.tree.bbox(item, column)
             value = self.tree.item(item, "values")[col_index]
 
-            # 创建编辑框
-            entry = ttk.Entry(self.tree)
+            # 获取Treeview的字体（通过样式）
+            style = ttk.Style()
+            font = style.lookup("Treeview", "font")
+            if not font:
+                font = "TkDefaultFont"
+
+            # 使用 tk.Entry 并设置相同字体
+            entry = tk.Entry(self.tree, font=font, borderwidth=1, relief="solid")
             entry.place(x=x, y=y, width=width, height=height)
             entry.insert(0, value)
+            entry.select_range(0, tk.END)
             entry.focus_set()
 
             def on_confirm(event=None):
@@ -474,12 +476,11 @@ class PreviewWindow:
                 values = list(self.tree.item(item, "values"))
                 values[col_index] = new_value
                 self.tree.item(item, values=values)
-                # 更新内存中的翻译
                 idx = self.tree.index(item)
                 self.modified_translations[idx] = new_value
 
             entry.bind("<Return>", on_confirm)
-            entry.bind("<FocusOut>", lambda e: entry.destroy())  # 失去焦点时销毁
+            entry.bind("<FocusOut>", lambda e: entry.destroy())
 
     def on_confirm(self):
         self.win.destroy()
@@ -493,7 +494,7 @@ class PreviewWindow:
 class TranslationApp:
     def __init__(self, root):
         self.root = root
-        root.title("波波的音频翻译软件")
+        root.title("波波的音频翻译软件 v2")  # 添加版本号
         root.geometry("920x820")
         root.resizable(True, True)
 
@@ -653,13 +654,9 @@ class TranslationApp:
         self.exclude_pattern_var = tk.StringVar(value=self.config_mgr.exclude_pattern)
         tk.Entry(filter_frame, textvariable=self.exclude_pattern_var, width=40).grid(row=1, column=1, padx=5, pady=2)
 
-        # 深色主题
-        theme_frame = tk.Frame(frame)
-        theme_frame.pack(pady=5, fill="x", padx=10)
-        self.dark_mode_var = tk.BooleanVar(value=self.config_mgr.dark_mode)
-        tk.Checkbutton(theme_frame, text="深色模式", variable=self.dark_mode_var,
-                       command=self.toggle_theme).pack(side=tk.LEFT)
-        tk.Button(theme_frame, text="保存所有设置", command=self.save_all_settings).pack(side=tk.RIGHT, padx=5)
+        # 保存所有设置按钮
+        btn_save = tk.Button(frame, text="保存所有设置", command=self.save_all_settings)
+        btn_save.pack(pady=10)
 
     def create_stats_tab(self):
         frame = self.stats_frame
@@ -702,7 +699,6 @@ class TranslationApp:
         self.config_mgr.enable_camel_split = self.camel_split_var.get()
         self.config_mgr.include_pattern = self.include_pattern_var.get().strip()
         self.config_mgr.exclude_pattern = self.exclude_pattern_var.get().strip()
-        self.config_mgr.dark_mode = self.dark_mode_var.get()
         self.config_mgr.save()
         messagebox.showinfo("成功", "所有设置已保存")
 
@@ -728,40 +724,6 @@ class TranslationApp:
                 subprocess.run(['xdg-open', folder_path])
         except Exception as e:
             messagebox.showerror("错误", f"无法打开缓存文件夹: {e}")
-
-    def toggle_theme(self):
-        if self.dark_mode_var.get():
-            self.apply_dark_theme()
-        else:
-            self.apply_light_theme()
-
-    def apply_dark_theme(self):
-        style = ttk.Style()
-        style.theme_use('clam')
-        # 简单暗色配置
-        self.root.tk_setPalette(background='#2b2b2b', foreground='#ffffff',
-                                 activeBackground='#3c3f41', activeForeground='#ffffff')
-        style.configure('TLabel', background='#2b2b2b', foreground='#ffffff')
-        style.configure('TButton', background='#3c3f41', foreground='#ffffff')
-        style.configure('TFrame', background='#2b2b2b')
-        style.configure('TNotebook', background='#2b2b2b')
-        style.configure('TNotebook.Tab', background='#3c3f41', foreground='#ffffff')
-        style.map('TButton', background=[('active', '#4e5254')])
-        self.log_text.config(bg='#1e1e1e', fg='#d4d4d4', insertbackground='white')
-        self.custom_prompt_text.config(bg='#1e1e1e', fg='#d4d4d4', insertbackground='white')
-
-    def apply_light_theme(self):
-        style = ttk.Style()
-        style.theme_use('vista')  # 或其他默认主题
-        self.root.tk_setPalette(background='#f0f0f0', foreground='#000000')
-        style.configure('TLabel', background='#f0f0f0', foreground='#000000')
-        style.configure('TButton', background='#e1e1e1', foreground='#000000')
-        style.configure('TFrame', background='#f0f0f0')
-        style.configure('TNotebook', background='#f0f0f0')
-        style.configure('TNotebook.Tab', background='#e1e1e1', foreground='#000000')
-        style.map('TButton', background=[('active', '#c0c0c0')])
-        self.log_text.config(bg='#ffffff', fg='#000000', insertbackground='black')
-        self.custom_prompt_text.config(bg='#ffffff', fg='#000000', insertbackground='black')
 
     def reset_stats(self):
         self.cache_mgr.reset_stats()
@@ -806,11 +768,10 @@ API 调用次数: {stats['api_calls']}
     def on_drop(self, event):
         files = self.root.tk.splitlist(event.data)
         if files:
-            # 取第一个文件夹
             for f in files:
                 if os.path.isdir(f):
                     self.folder_path.set(f)
-                    self.audio_files = []  # 清空旧结果
+                    self.audio_files = []
                     self.log(f"已拖入文件夹: {f}")
                     break
             else:
@@ -902,7 +863,6 @@ API 调用次数: {stats['api_calls']}
                     if ext in SUPPORTED_AUDIO_EXTS:
                         full_path = os.path.join(root_dir, file)
                         rel_path = os.path.relpath(full_path, folder)
-                        # 应用正则过滤
                         if FileProcessor.apply_regex_filter(rel_path, include, exclude):
                             audio_relpaths.append(rel_path)
                 if self.stop_event.is_set():
@@ -925,7 +885,6 @@ API 调用次数: {stats['api_calls']}
             if count == 0:
                 self.log(f"支持的格式: {', '.join(SUPPORTED_AUDIO_EXTS)}")
             else:
-                # 显示前200个
                 if count <= 200:
                     for rel in audio_relpaths:
                         self.log(f"  {rel}")
@@ -947,7 +906,6 @@ API 调用次数: {stats['api_calls']}
             messagebox.showerror("错误", "请选择文件夹")
             return
 
-        # 如果没有提前扫描，则立即扫描
         if not self.audio_files:
             self.log("未预先检索，正在扫描文件夹...")
             self.scan_and_then_translate(api_key, folder)
@@ -1008,7 +966,6 @@ API 调用次数: {stats['api_calls']}
             messagebox.showwarning("警告", "没有可处理的音频文件，请先检索或选择其他文件夹")
             return
 
-        # 保存 API Key 和当前设置（确保使用最新）
         self.config_mgr.api_key = api_key
         self.config_mgr.source_lang = LANGUAGES[self.source_lang_var.get()]
         self.config_mgr.target_lang = LANGUAGES[self.target_lang_var.get()]
@@ -1030,7 +987,6 @@ API 调用次数: {stats['api_calls']}
             total_files = len(audio_relpaths)
             self.log(f"准备处理 {total_files} 个音频文件")
 
-            # 过滤掉已完成的文件（断点续传）
             pending_files = []
             pending_indices = []
             for i, rel in enumerate(audio_relpaths):
@@ -1045,7 +1001,6 @@ API 调用次数: {stats['api_calls']}
                 self.root.after(0, self.rename_finished, "完成", "所有文件已处理")
                 return
 
-            # 提取文件名用于翻译
             clean_names = []
             for rel in pending_files:
                 base = os.path.basename(rel)
@@ -1070,7 +1025,6 @@ API 调用次数: {stats['api_calls']}
                 self.root.after(0, self.rename_finished, "错误", str(e))
                 return
 
-            # 预览窗口
             preview_done = threading.Event()
             preview_result = [None]
 
@@ -1079,8 +1033,6 @@ API 调用次数: {stats['api_calls']}
                 preview_done.set()
 
             self.root.after(0, lambda: self.show_preview(pending_files, translations, preview_callback))
-
-            # 等待预览窗口关闭
             preview_done.wait()
 
             final_translations = preview_result[0]
@@ -1089,7 +1041,6 @@ API 调用次数: {stats['api_calls']}
                 self.root.after(0, self.rename_finished, "取消", "操作已取消")
                 return
 
-            # 更新缓存（可能有修改）
             for rel, new_trans in zip(pending_files, final_translations):
                 original_clean = clean_names[pending_files.index(rel)]
                 if original_clean != new_trans:
@@ -1135,14 +1086,12 @@ API 调用次数: {stats['api_calls']}
                         renamed += 1
                         self.log(f"重命名: {rel_path} -> {new_rel}")
 
-                    # 标记为已完成
                     self.progress_data[rel_path] = 'renamed'
 
                 except Exception as e:
                     errors.append(f"{rel_path}: {e}")
                     self.log(f"重命名失败: {rel_path} - {e}")
 
-                # 保存进度
                 if i % 10 == 0 or i == total-1:
                     self.save_progress()
 
@@ -1202,10 +1151,6 @@ if __name__ == "__main__":
         root = TkinterDnD.Tk()
     else:
         root = tk.Tk()
-        # 提示用户可安装 tkinterdnd2 获得拖放支持
         print("提示: 如需拖放文件夹功能，请安装 tkinterdnd2: pip install tkinterdnd2")
     app = TranslationApp(root)
-    # 初始化主题
-    if app.config_mgr.dark_mode:
-        app.apply_dark_theme()
     root.mainloop()
