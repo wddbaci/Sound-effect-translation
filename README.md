@@ -1,8 +1,9 @@
-# WavTranslator - AI音频批量翻译工具
+# WavTranslator - AI音频名称批量翻译工具
 
 WavTranslator 是一个基于 DeepSeek API 的桌面工具，可以批量将音频文件名中的英文部分翻译成中文，并按照用户指定的命名模式重命名文件。支持多种常见音频格式，内置翻译缓存以避免重复请求，适合音效库、音乐文件整理等场景。
 
-<img width="1840" height="1696" alt="f399f78e43be495def6dc76a04ffa5bd" src="https://github.com/user-attachments/assets/b181f5af-0135-41b5-babf-3a82a080ff11" />
+<img width="1840" height="1696" alt="image" src="https://github.com/user-attachments/assets/d26cbd3d-2ab5-4709-88b7-d8ace2edcd82" />
+
 
 
 ## ✨ 功能特性
