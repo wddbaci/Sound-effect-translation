@@ -1,5 +1,18 @@
 # WavTranslator - AI音频名称批量翻译工具
 
+
+文件损坏时在终端运行以下代码：
+#!/bin/bash
+echo "正在修复应用权限，请稍候..."
+# 开启“任何来源”（需要管理员权限）
+sudo spctl --master-disable
+# 移除应用的隔离属性
+sudo xattr -rd com.apple.quarantine /Applications/音效翻译v2.app
+echo "修复完成！现在可以打开应用了。"
+read -p "按回车键退出..."
+
+
+
 WavTranslator 是一个基于 DeepSeek API 的桌面工具，可以批量将音频文件名中的英文部分翻译成中文，并按照用户指定的命名模式重命名文件。支持多种常见音频格式，内置翻译缓存以避免重复请求，适合音效库、音乐文件整理等场景。
 
 <img width="1840" height="1696" alt="image" src="https://github.com/user-attachments/assets/d26cbd3d-2ab5-4709-88b7-d8ace2edcd82" />
