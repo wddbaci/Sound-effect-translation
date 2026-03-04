@@ -3,7 +3,7 @@
 
 文件损坏时在终端运行以下代码：
 脚本内容（fix.sh）：
-```language
+```
 bash
 #!/bin/bash
 echo "正在修复应用权限，请稍候..."
@@ -14,7 +14,7 @@ sudo xattr -rd com.apple.quarantine /Applications/音效翻译v2.app
 echo "修复完成！现在可以打开应用了。"
 read -p "按回车键退出..."
 
-
+```
 
 WavTranslator 是一个基于 DeepSeek API 的桌面工具，可以批量将音频文件名中的英文部分翻译成中文，并按照用户指定的命名模式重命名文件。支持多种常见音频格式，内置翻译缓存以避免重复请求，适合音效库、音乐文件整理等场景。
 
