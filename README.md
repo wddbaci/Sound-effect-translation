@@ -35,7 +35,8 @@ https://github.com/user-attachments/assets/e89a8d24-60f8-4d99-8866-db515a8213a0
 
 WavTranslator 是一个基于 DeepSeek API 的桌面工具，可以批量将音频文件名中的英文部分翻译成中文，并按照用户指定的命名模式重命名文件。支持多种常见音频格式，内置翻译缓存以避免重复请求，适合音效库、音乐文件整理等场景。
 
-<img width="1840" height="1696" alt="image" src="https://github.com/user-attachments/assets/0901dcc3-c99a-49c9-a59e-b57f6e951334" />
+<img width="1600" height="1256" alt="0c82bfb80833232dab2f073f7f12f55c" src="https://github.com/user-attachments/assets/783ea87b-2788-43f6-be02-cb77f8375e13" />
+
 
 
 
