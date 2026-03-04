@@ -80,15 +80,19 @@ macOS/Linux：~/.config/WavTranslator/config.json
 翻译缓存位置：
 
 同上目录下的 translation_cache.json，自动保存，避免重复翻译。
+
 清空缓存：
 
 界面中点击「清空缓存」按钮可删除所有缓存记录，下次将重新翻译。
+
+
 📝 注意事项
 
 翻译质量取决于 DeepSeek API，请确保网络畅通且 API Key 有效。
 批量翻译时会根据 CONCURRENT_BATCHES 并发请求，默认 2 批同时进行，避免触发限流。
 文件名中的英文部分会先进行驼峰分词处理（例如 FootstepOnGrass 会被拆分为 Footstep On Grass），提高翻译准确性。
 重命名时会自动处理文件名冲突（添加数字后缀）。
+
 🤝 贡献
 
 欢迎提交 Issue 或 Pull Request 来改进本项目。
