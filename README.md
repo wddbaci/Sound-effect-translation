@@ -67,7 +67,3 @@ macOS/Linux：~/.config/WavTranslator/config.json
 🤝 贡献
 
 欢迎提交 Issue 或 Pull Request 来改进本项目。
-
-📄 许可证
-
-MIT © [文静波波]
